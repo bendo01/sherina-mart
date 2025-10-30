@@ -5,6 +5,7 @@ namespace App\Commands;
 use Illuminate\Console\Scheduling\Schedule;
 use LaravelZero\Framework\Commands\Command;
 use App\Models\Category;
+use App\Models\Variety;
 
 class MenuCommand extends Command
 {
@@ -100,14 +101,59 @@ class MenuCommand extends Command
             }
         } else if ($option == 5) {
             $this->info("Anda Memilih Pilihan : {$option} Daftar Jenis Barang");
+            $headers = ['kode', 'nama', 'dibuat', 'diubah'];
+            $data = Variety::all()->map(function ($item) {
+                return [
+                    'kode' => $item->code,
+                    'nama' => $item->name,
+                    'dibuat' => $item->created_at,
+                    'diubah' => $item->updated_at,
+                ];
+            })->toArray();
+            $this->table($headers, $data);
         } else if ($option == 6) {
             $this->info("Anda Memilih Pilihan : {$option} Tambah Jenis Barang");
+            $variety = new Variety();
+            $variety->code = (int)$this->ask("Masukkan Kode Jenis : ");
+            $variety->name = $this->ask("Masukkan Nama Jenis : ");
+            if ($variety->save()) {
+                $this->notify("Success", "data berhasil disimpan");
+            } else {
+                $this->notify("Failed", "data gagal disimpan");
+            }
         } else if ($option == 7) {
             $this->info("Anda Memilih Pilihan : {$option} Ubah Jenis Barang");
+            $code = (int)$this->ask("Masukkan Kode Jenis yang akan diubah : ");
+            $variety = Variety::where('code', $code)->first();
+            $variety->code = (int)$this->ask("Masukkan Kode Jenis : ");
+            $variety->name = $this->ask("Masukkan Nama Jenis : ");
+            if ($variety->save()) {
+                $this->notify("Success", "data berhasil diubah");
+            } else {
+                $this->notify("Failed", "data gagal diubah");
+            }
         } else if ($option == 8) {
             $this->info("Anda Memilih Pilihan : {$option} Hapus Jenis Barang");
+            $code = (int)$this->ask("Masukkan Kode Jenis yang akan dihapus : ");
+            $variety = Variety::where('code', $code)->first();
+            if ($variety->delete()) {
+                $this->notify("Success", "data berhasil dihapus");
+            } else {
+                $this->notify("Failed", "data gagal dihapus");
+            }
+
         } else if ($option == 9) {
-            $this->info("Anda Memilih Pilihan : {$option} Daftar Barang");
+            $this->info("Anda Memilih Pilihan : {$option} Daftar Jenis Barang");
+            $headers = ['kode', 'nama', 'dibuat', 'diubah'];
+            $data = Variety::all()->map(function ($item) {
+                return [
+                    'kode' => $item->code,
+                    'nama' => $item->name,
+                    'dibuat' => $item->created_at,
+                    'diubah' => $item->updated_at,
+                ];
+            })->toArray();
+            $this->table($headers, $data);
         } else if ($option == 10) {
             $this->info("Anda Memilih Pilihan : {$option} Tambah Barang");
         } else if ($option == 11) {
