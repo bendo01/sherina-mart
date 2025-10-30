@@ -80,8 +80,24 @@ class MenuCommand extends Command
 
         } else if ($option == 3) {
             $this->info("Anda Memilih Pilihan : {$option} Ubah Kategori Barang");
+            $code = (int)$this->ask("Masukkan Kode Kategori yang akan diubah : ");
+            $category = Category::where('code', $code)->first();
+            $category->code = (int)$this->ask("Masukkan Kode Kategori : ");
+            $category->name = $this->ask("Masukkan Nama Kategori : ");
+            if ($category->save()) {
+                $this->notify("Success", "data berhasil diubah");
+            } else {
+                $this->notify("Failed", "data gagal diubah");
+            }
         } else if ($option == 4) {
             $this->info("Anda Memilih Pilihan : {$option} Hapus Kategori Barang");
+            $code = (int)$this->ask("Masukkan Kode Kategori yang akan dihapus : ");
+            $category = Category::where('code', $code)->first();
+            if ($category->delete()) {
+                $this->notify("Success", "data berhasil dihapus");
+            } else {
+                $this->notify("Failed", "data gagal dihapus");
+            }
         } else if ($option == 5) {
             $this->info("Anda Memilih Pilihan : {$option} Daftar Jenis Barang");
         } else if ($option == 6) {
