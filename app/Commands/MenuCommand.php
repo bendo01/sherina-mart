@@ -4,8 +4,10 @@ namespace App\Commands;
 
 use Illuminate\Console\Scheduling\Schedule;
 use LaravelZero\Framework\Commands\Command;
+use function Laravel\Prompts\select;
 use App\Models\Category;
 use App\Models\Variety;
+use App\Models\Product;
 
 class MenuCommand extends Command
 {
@@ -143,19 +145,42 @@ class MenuCommand extends Command
             }
 
         } else if ($option == 9) {
-            $this->info("Anda Memilih Pilihan : {$option} Daftar Jenis Barang");
-            $headers = ['kode', 'nama', 'dibuat', 'diubah'];
-            $data = Variety::all()->map(function ($item) {
+            $this->info("Anda Memilih Pilihan : {$option} Daftar Barang");
+            $headers = ['kode', 'nama', 'kategori', 'jenis','dibuat', 'diubah'];
+            $data = Product::all()->map(function ($item) {
                 return [
                     'kode' => $item->code,
                     'nama' => $item->name,
+                    'kategori' => $item->category->name,
+                    'jenis' => $item->variety->name,
                     'dibuat' => $item->created_at,
                     'diubah' => $item->updated_at,
                 ];
             })->toArray();
             $this->table($headers, $data);
         } else if ($option == 10) {
+            $product = new Product();
             $this->info("Anda Memilih Pilihan : {$option} Tambah Barang");
+            $categories = Category::all()->pluck('name', 'id')->toArray();
+            $product->category_id = select(
+                label: 'Pilih Kategori Barang:',
+                options: $categories,
+            );
+
+            $varieties = Variety::all()->pluck('name', 'id')->toArray();
+            $product->variety_id = select(
+                label: 'Pilih Kategori Barang:',
+                options: $varieties,
+            );
+
+            $product->code = (int)$this->ask("Masukkan Kode Barang : ");
+            $product->name = $this->ask("Masukkan Nama Barang : ");
+            if ($product->save()) {
+                $this->notify("Success", "data berhasil disimpan");
+            } else {
+                $this->notify("Failed", "data gagal disimpan");
+            }
+
         } else if ($option == 11) {
             $this->info("Anda Memilih Pilihan : {$option} Ubah Barang");
         } else if ($option == 12) {
