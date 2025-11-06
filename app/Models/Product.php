@@ -28,6 +28,6 @@ class Product extends Model
 
     public function sale_transactions(): HasMany
     {
-        return $this->hasMany(Product::class);
+        return $this->hasMany(SaleTransaction::class);
     }
 }
