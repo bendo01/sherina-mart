@@ -8,6 +8,7 @@ use function Laravel\Prompts\select;
 use App\Models\Category;
 use App\Models\Variety;
 use App\Models\Product;
+use App\Models\SaleTransaction;
 
 class MenuCommand extends Command
 {
@@ -46,6 +47,7 @@ class MenuCommand extends Command
             "Pilihan 11: Tambah Barang",
             "Pilihan 12: Ubah Barang",
             "Pilihan 13 : Hapus Barang",
+            "Pilihan 14 : Daftar Penjualan Barang",
         ];
 
         $option = $this->menu($title, $options)
@@ -64,13 +66,25 @@ class MenuCommand extends Command
 
         // $this->info("Anda Memilih Pilihan : {$option}");
         if ($option == 0) {
-            $this->info("Anda Memilih Pilihan : {$option} Transaksi Pembelian Barang");
-        } else if ($option == 1) {
-            // $this->info("Anda Memilih Pilihan : {$option} Daftar Kategori Barang");
-            // foreach (Category::all() as $category) {
-            //     $this->line("Kode : {$category->code} | Nama : {$category->name}");
-            // }
+            $sale = new SaleTransaction;
+            // $this->info("Anda Memilih Pilihan : {$option} Transaksi Pembelian Barang");
+            $products = Product::all()->pluck('name', 'id')->toArray();
+            $sale->product_id = select(
+                label: 'Pilih Barang:',
+                options: $products,
+            );
+            $choosen_product = Product::find($sale->product_id);
+            $sale->price = $choosen_product->price;
+            $sale->quantity = (int)$this->ask("Masukkan Jumlah Barang : ");
+            if ($sale->save()) {
+                $this->notify("Success", "data berhasil disimpan");
+                $payment = $sale->price * $sale->quantity;
+                $this->info("Total Bayar: {$payment}");
+            } else {
+                $this->notify("Failed", "data gagal disimpan");
+            }
 
+        } else if ($option == 1) {
             $headers = ['kode', 'nama', 'dibuat', 'diubah'];
             $data = Category::all()->map(function ($item) {
                 return [
@@ -198,6 +212,21 @@ class MenuCommand extends Command
             $this->info("Anda Memilih Pilihan : {$option} Ubah Barang");
         } else if ($option == 12) {
             $this->info("Anda Memilih Pilihan : {$option} Hapus Barang");
+        } else if ($option == 13) {
+            $headers = ['kode', 'nama', 'harga', 'jumlah', 'bayar', 'dibuat', 'diubah'];
+            $data = SaleTransaction::all()->map(function ($item) {
+                return [
+                    'kode' => $item->product->code,
+                    'nama' => $item->product->name,
+                    'harga' => $item->product->price,
+                    'jumlah' => $item->quantity,
+                    'jumlah bayar' => $item->quantity * $item->product->price,
+                    'dibuat' => $item->created_at,
+                    'diubah' => $item->updated_at,
+                ];
+            })->toArray();
+            $this->table($headers, $data);
+
         } else {
             
             $this->info("Terimakasih telah menggunakan applikasi kami.");
