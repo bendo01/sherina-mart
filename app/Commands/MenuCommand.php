@@ -66,10 +66,21 @@ class MenuCommand extends Command
         if ($option == 0) {
             $this->info("Anda Memilih Pilihan : {$option} Transaksi Pembelian Barang");
         } else if ($option == 1) {
-            $this->info("Anda Memilih Pilihan : {$option} Daftar Kategori Barang");
-            foreach (Category::all() as $category) {
-                $this->line("Kode : {$category->code} | Nama : {$category->name}");
-            }
+            // $this->info("Anda Memilih Pilihan : {$option} Daftar Kategori Barang");
+            // foreach (Category::all() as $category) {
+            //     $this->line("Kode : {$category->code} | Nama : {$category->name}");
+            // }
+
+            $headers = ['kode', 'nama', 'dibuat', 'diubah'];
+            $data = Category::all()->map(function ($item) {
+                return [
+                    'kode' => $item->code,
+                    'nama' => $item->name,
+                    'dibuat' => $item->created_at,
+                    'diubah' => $item->updated_at,
+                ];
+            })->toArray();
+            $this->table($headers, $data);
         } else if ($option == 2) {
             $this->info("Anda Memilih Pilihan : {$option} Tambah Kategori Barang");
             $category = new Category();
@@ -146,11 +157,12 @@ class MenuCommand extends Command
 
         } else if ($option == 9) {
             $this->info("Anda Memilih Pilihan : {$option} Daftar Barang");
-            $headers = ['kode', 'nama', 'kategori', 'jenis','dibuat', 'diubah'];
+            $headers = ['kode', 'nama', 'harga', 'kategori', 'jenis','dibuat', 'diubah'];
             $data = Product::all()->map(function ($item) {
                 return [
                     'kode' => $item->code,
                     'nama' => $item->name,
+                    'harga' => $item->price,
                     'kategori' => $item->category->name,
                     'jenis' => $item->variety->name,
                     'dibuat' => $item->created_at,
@@ -175,6 +187,7 @@ class MenuCommand extends Command
 
             $product->code = (int)$this->ask("Masukkan Kode Barang : ");
             $product->name = $this->ask("Masukkan Nama Barang : ");
+            $product->price = (int)$this->ask("Masukkan Harga Barang : ");
             if ($product->save()) {
                 $this->notify("Success", "data berhasil disimpan");
             } else {

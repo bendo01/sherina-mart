@@ -15,6 +15,7 @@ return new class extends Migration
             $table->uuid("id")->primary();
             $table->integer("code");
             $table->string("name");
+            $table->integer("price");
             $table->uuid("variety_id");
             $table->uuid("category_id");
             $table->timestamps();
